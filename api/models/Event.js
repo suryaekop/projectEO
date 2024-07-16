@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const placeSchema = new mongoose.Schema({
+const eventSchema = new mongoose.Schema({
   owner: {type:mongoose.Schema.Types.ObjectId, ref:'User'},
   title: String,
   address: String,
@@ -8,12 +8,13 @@ const placeSchema = new mongoose.Schema({
   description: String,
   perks: [String],
   extraInfo: String,
-  checkIn: Number,
-  checkOut: Number,
+  date: Date,
   maxGuests: Number,
   price: Number,
+  approve: Number,
+  requirement: String
 });
 
-const PlaceModel = mongoose.model('Place', placeSchema);
+const EventModel = mongoose.model('Events',eventSchema);
 
-module.exports = PlaceModel;
+module.exports = EventModel;

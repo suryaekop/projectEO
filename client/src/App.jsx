@@ -12,8 +12,12 @@ import PlacesFormPage from "./pages/PlacesFormPage";
 import PlacePage from "./pages/PlacePage";
 import BookingsPage from "./pages/BookingsPage";
 import BookingPage from "./pages/BookingPage";
+import UserPage from './pages/UsersPage';
+import ListEventPage from './pages/ListEvent';
+import ListTicketPage from './pages/ListTicketsPage';
 
-axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL;
+
+axios.defaults.baseURL = "http://localhost:4000";
 axios.defaults.withCredentials = true;
 
 function App() {
@@ -25,12 +29,15 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/account" element={<ProfilePage />} />
-          <Route path="/account/places" element={<PlacesPage />} />
-          <Route path="/account/places/new" element={<PlacesFormPage />} />
-          <Route path="/account/places/:id" element={<PlacesFormPage />} />
-          <Route path="/place/:id" element={<PlacePage />} />
-          <Route path="/account/bookings" element={<BookingsPage />} />
-          <Route path="/account/bookings/:id" element={<BookingPage />} />
+          <Route path="/users" element={<UserPage/>} />
+          <Route path="/account/events" element={<PlacesPage />} />
+          <Route path="/admin/events" element={<ListEventPage />} />
+          <Route path="/admin/tickets" element={<ListTicketPage />} />
+          <Route path="/account/events/new" element={<PlacesFormPage />} />
+          <Route path="/account/events/:id" element={<PlacesFormPage />} />
+          <Route path="/events/:id" element={<PlacePage />} />
+          <Route path="/account/tiket" element={<BookingsPage />} />
+          <Route path="/account/tikets/:id" element={<BookingPage />} />
         </Route>
       </Routes>
     </UserContextProvider>

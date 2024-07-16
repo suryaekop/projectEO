@@ -13,16 +13,16 @@ export default function PlacesFormPage() {
   const [description,setDescription] = useState('');
   const [perks,setPerks] = useState([]);
   const [extraInfo,setExtraInfo] = useState('');
-  const [checkIn,setCheckIn] = useState('');
-  const [checkOut,setCheckOut] = useState('');
+  const [date,setDate] = useState('');
   const [maxGuests,setMaxGuests] = useState(1);
   const [price,setPrice] = useState(100);
+  const [requirement, setRequirement] = useState(null)
   const [redirect,setRedirect] = useState(false);
   useEffect(() => {
     if (!id) {
       return;
     }
-    axios.get('/places/'+id).then(response => {
+    axios.get('/events/'+id).then(response => {
        const {data} = response;
        setTitle(data.title);
        setAddress(data.address);
@@ -30,8 +30,7 @@ export default function PlacesFormPage() {
        setDescription(data.description);
        setPerks(data.perks);
        setExtraInfo(data.extraInfo);
-       setCheckIn(data.checkIn);
-       setCheckOut(data.checkOut);
+       setDate(data.date);
        setMaxGuests(data.maxGuests);
        setPrice(data.price);
     });
@@ -57,35 +56,48 @@ export default function PlacesFormPage() {
 
   async function savePlace(ev) {
     ev.preventDefault();
-    const placeData = {
-      title, address, addedPhotos,
-      description, perks, extraInfo,
-      checkIn, checkOut, maxGuests, price,
-    };
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('address', address);
+    addedPhotos.forEach((photo, index) => {
+      formData.append(`addedPhotos[${index}]`, photo);
+    });
+    formData.append('description', description);
+    formData.append('perks', JSON.stringify(perks)); // stringify array
+    formData.append('extraInfo', extraInfo);
+    formData.append('date', date);
+    formData.append('maxGuests', maxGuests);
+    formData.append('price', price);
+    if (requirement) {
+      formData.append('requirement', requirement); // Append file if it exists
+    }
+  
     if (id) {
       // update
-      await axios.put('/places', {
-        id, ...placeData
+      formData.append('id', id);
+      await axios.put('/events', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       setRedirect(true);
     } else {
       // new place
-      await axios.post('/places', placeData);
+      await axios.post('/events', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
       setRedirect(true);
     }
-
   }
 
   if (redirect) {
-    return <Navigate to={'/account/places'} />
+    return <Navigate to={'/account/events'} />
   }
 
   return (
     <div>
       <AccountNav />
-      <form onSubmit={savePlace}>
-        {preInput('Title', 'Title for your place. should be short and catchy as in advertisement')}
-        <input type="text" value={title} onChange={ev => setTitle(ev.target.value)} placeholder="title, for example: My lovely apt"/>
+      <form onSubmit={savePlace} encType="multipart/form-data">
+        {preInput('Title', 'Title for your event. should be short and catchy as in advertisement')}
+        <input type="text" value={title} onChange={ev => setTitle(ev.target.value)} placeholder="title, for example: Tau Tau Fest"/>
         {preInput('Address', 'Address to this place')}
         <input type="text" value={address} onChange={ev => setAddress(ev.target.value)}placeholder="address"/>
         {preInput('Photos','more = better')}
@@ -93,35 +105,31 @@ export default function PlacesFormPage() {
         {preInput('Description','description of the place')}
         <textarea value={description} onChange={ev => setDescription(ev.target.value)} />
         {preInput('Perks','select all the perks of your place')}
-        <div className="grid mt-2 gap-2 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+        <div className="grid mt-2 gap-2 grid-cols-3 md:grid-cols-3 lg:grid-cols-3">
           <Perks selected={perks} onChange={setPerks} />
         </div>
-        {preInput('Extra info','house rules, etc')}
+        {preInput('Extra info','Rules, etc')}
         <textarea value={extraInfo} onChange={ev => setExtraInfo(ev.target.value)} />
+        {preInput('Date Info','Date and Time Info, etc')}
+        <div>
+            <h3 className="mt-2 -mb-1">Check in time</h3>
+            <input type="date"
+                   value={date}
+                   onChange={ev => setDate(ev.target.value)}
+                   className="w-full"/>
+          </div>
+        {preInput('Requirement', 'Requirement Events')}
+        <input type="file" onChange={ev => setRequirement(ev.target.files[0])} accept=".pdf"/>
         {preInput('Check in&out times','add check in and out times, remember to have some time window for cleaning the room between guests')}
         <div className="grid gap-2 grid-cols-2 md:grid-cols-4">
-          <div>
-            <h3 className="mt-2 -mb-1">Check in time</h3>
-            <input type="text"
-                   value={checkIn}
-                   onChange={ev => setCheckIn(ev.target.value)}
-                   placeholder="14"/>
-          </div>
-          <div>
-            <h3 className="mt-2 -mb-1">Check out time</h3>
-            <input type="text"
-                   value={checkOut}
-                   onChange={ev => setCheckOut(ev.target.value)}
-                   placeholder="11" />
-          </div>
           <div>
             <h3 className="mt-2 -mb-1">Max number of guests</h3>
             <input type="number" value={maxGuests}
                    onChange={ev => setMaxGuests(ev.target.value)}/>
           </div>
           <div>
-            <h3 className="mt-2 -mb-1">Price per night</h3>
-            <input type="number" value={price}
+            <h3 className="mt-2 -mb-1">Price</h3>
+            <input type="text" value={price}
                    onChange={ev => setPrice(ev.target.value)}/>
           </div>
         </div>
